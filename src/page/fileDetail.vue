@@ -101,6 +101,7 @@
       <el-table
         border
         @selection-change="handleSelectionChange"
+        resizable
         :data="tableData"
         style="width: 100%">
         <el-table-column
@@ -175,7 +176,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          width="160"
+          width="100"
           prop="date"
           label="日期"
           >
@@ -186,7 +187,7 @@
         <el-table-column
           prop="note"
           label="备注"
-          width="180">
+          >
           <template slot-scope="scope">
             <!--<el-input @keyup.enter.native.prevent="changeNote(scope.row.virtualId, scope.row.id)" v-model="scope.row.note" placeholder="请输入内容"></el-input>-->
             <el-select v-if="scope.row.note === '借阅' || scope.row.note === '销毁' || scope.row.note === '其他'"
@@ -207,7 +208,7 @@
           v-if="superShow == 'true'"
           label="操作"
           fixed="right"
-          width="100">
+          width="80">
           <template slot-scope="scope">
             <el-button @click="openUpdate(scope.row)" type="warning" size="small">修改</el-button>
           </template>
@@ -253,7 +254,7 @@
             </div>
             <div class="detail-item">
               <span class="input-label">页数：</span>
-              <el-input class="detail-input"  v-model="dialogData.pageCount"></el-input>
+              <el-input class="detail-input" type="number"  v-model="dialogData.pageCount"></el-input>
             </div>
           </div>
           <div class="detail">
@@ -267,9 +268,9 @@
               </el-date-picker>
             </div>
             <div class="detail-item">
-              <span class="input-label">保密年限：</span>
+              <span class="input-label">保密年限(0-无；-1-永久)：</span>
               <!--<el-input class="detail-input" @change="numLimit" min="1" type="number" v-model="dialogData.secretDate"></el-input>-->
-              <SelectInput :options = 'options'></SelectInput>
+              <SelectInput :local-options = 'options' placeholder = '请输入大于等于-1的数字' v-model="dialogData.secretDate"></SelectInput>
             </div>
             <div class="detail-item">
               <span class="input-label">备注：</span>
@@ -340,7 +341,7 @@
             </div>
             <div class="detail-item">
               <span class="input-label">页数：</span>
-              <el-input class="detail-input"  v-model="dialogData.pageCount"></el-input>
+              <el-input class="detail-input" type="number"  v-model="dialogData.pageCount"></el-input>
             </div>
           </div>
           <div class="detail">
@@ -354,8 +355,9 @@
               </el-date-picker>
             </div>
             <div class="detail-item">
-              <span class="input-label">保密年限：</span>
-              <el-input class="detail-input" @change="numLimit" type="number"   v-model="dialogData.secretDate"></el-input>
+              <span class="input-label">保密年限(0-无；-1-永久)：</span>
+              <!--<el-input class="detail-input" @change="numLimit" type="number"   v-model="dialogData.secretDate"></el-input>-->
+              <SelectInput :local-options = 'options' placeholder = '请输入大于等于-1的数字' v-model="dialogData.secretDate"></SelectInput>
             </div>
             <div class="detail-item">
               <span class="input-label">备注：</span>
@@ -453,7 +455,6 @@
           fileType: this.fileType
         }
         search(data).then(res => {
-          // console.log(res)
           if (res.data.status === config.ERR_OK) {
             this.tableData = res.data.data
             this.count = res.data.count
@@ -487,20 +488,16 @@
         let fd = new FormData()
         fd.append('file', event.target.files[0])
         fd.append('fileType', this.fileType)
-        let config = {
+        let con = {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         }
-        importExcel(fd, config).then(res => {
+        importExcel(fd, con).then(res => {
           if (res.data.status === config.ERR_OK) {
-            this.page = 1
-            this._search() // 刷新数据
+            this.searchFirst() // 刷新数据
             this.insertShow = false // 关闭弹窗
-            this.$msgbox({
-              type: 'info',
-              message: res.data.msg
-            })
+            this.$alert(res.data.msg, '提示')
           } else {
             this.$alert(res.data.msg, '提示')
           }
@@ -533,20 +530,24 @@
         this.multipleSelection = val
       },
       _insertClick () {
-        let data = {
-          id: this.dialogData.id,
-          fileId: this.dialogData.fileId,
-          rollId: this.dialogData.rollId,
-          responsePerson: this.dialogData.responsePerson,
-          title: this.dialogData.title,
-          level: this.dialogData.level,
-          date: this.dialogData.date,
-          secretDate: this.dialogData.secretDate,
-          note: this.dialogData.note,
-          fileType: this.dialogData.fileType,
-          pageCount: this.dialogData.pageCount
+        // let data = {
+        //   id: this.dialogData.id,
+        //   fileId: this.dialogData.fileId,
+        //   rollId: this.dialogData.rollId,
+        //   responsePerson: this.dialogData.responsePerson,
+        //   title: this.dialogData.title,
+        //   level: this.dialogData.level,
+        //   date: this.dialogData.date,
+        //   secretDate: this.dialogData.secretDate,
+        //   note: this.dialogData.note,
+        //   fileType: this.dialogData.fileType,
+        //   pageCount: this.dialogData.pageCount
+        // }
+        if (this.dialogData.secretDate < -1 || this.dialogData.secretDate > 999) {
+          this.$alert('保密年限只能大于等于-1且小于1000', '提示')
+          return
         }
-        insertClick(data).then(res => {
+        insertClick(this.dialogData).then(res => {
           if (res.data.status === config.ERR_OK) {
             this.searchFirst() // 刷新数据
             this.$msgbox({
@@ -559,21 +560,25 @@
         })
       },
       _updateClick () {
-        let data = {
-          virtualId: this.dialogData.virtualId,
-          id: this.dialogData.id,
-          fileId: this.dialogData.fileId,
-          rollId: this.dialogData.rollId,
-          responsePerson: this.dialogData.responsePerson,
-          title: this.dialogData.title,
-          level: this.dialogData.level,
-          date: this.dialogData.date,
-          secretDate: this.dialogData.secretDate,
-          note: this.dialogData.note,
-          fileType: this.dialogData.fileType,
-          pageCount: this.dialogData.pageCount
+        // let data = {
+        //   virtualId: this.dialogData.virtualId,
+        //   id: this.dialogData.id,
+        //   fileId: this.dialogData.fileId,
+        //   rollId: this.dialogData.rollId,
+        //   responsePerson: this.dialogData.responsePerson,
+        //   title: this.dialogData.title,
+        //   level: this.dialogData.level,
+        //   date: this.dialogData.date,
+        //   secretDate: this.dialogData.secretDate,
+        //   note: this.dialogData.note,
+        //   fileType: this.dialogData.fileType,
+        //   pageCount: this.dialogData.pageCount
+        // }
+        if (this.dialogData.secretDate < -1 || this.dialogData.secretDate > 999) {
+          this.$alert('保密年限只能大于等于-1且小于1000', '提示')
+          return
         }
-        updateClick(data).then(res => {
+        updateClick(this.dialogData).then(res => {
           if (res.data.status === config.ERR_OK) {
             this._search() // 刷新数据
             this.$msgbox({
@@ -592,7 +597,7 @@
           rollId: '',
           responsePerson: '',
           title: '',
-          level: '',
+          level: '无',
           date: '',
           secretDate: '',
           note: '',
@@ -677,8 +682,8 @@
         },
         levelOptions: [
           {
-            value: '',
-            label: '请选择'
+            value: '无',
+            label: '无'
           },
           {
             value: '绝密',
@@ -693,8 +698,8 @@
             label: '秘密'
           },
           {
-            value: '一般',
-            label: '一般'
+            value: '内部',
+            label: '内部'
           }
         ],
         fileTypeOptions: [
@@ -744,8 +749,8 @@
         tableData: [],
         multipleSelection: [],
         options: [
-          {name: '无期限', value: 0},
-          {name: '永久期限', value: -1}
+          {name: '无', value: '0'},
+          {name: '永久', value: '-1'}
         ]
       }
     },

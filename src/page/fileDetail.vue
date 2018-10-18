@@ -137,6 +137,9 @@
         <el-table-column
           prop="fileId"
           label="文号">
+          <template slot-scope="scope">
+            <span v-html="showDate(scope.row.fileId)" ></span>
+          </template>
         </el-table-column>
         <el-table-column
           prop="responsePerson"

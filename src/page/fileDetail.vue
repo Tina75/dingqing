@@ -134,6 +134,9 @@
         <el-table-column
           prop="fileId"
           label="文号">
+          <template slot-scope="scope">
+            <span v-html="showDate(scope.row.fileId)" ></span>
+          </template>
         </el-table-column>
         <el-table-column
           prop="responsePerson"
@@ -146,11 +149,11 @@
           prop="title"
           label="题名">
           <template slot-scope="scope">
-            <span v-if="scope.row.fileColor == 'red'" style="color: #F56C6C">{{ scope.row.title }}</span>
-            <span v-else-if="scope.row.fileColor == 'blue'" style="color: #409EFF">{{ scope.row.title }}</span>
-            <span v-else-if="scope.row.fileColor == 'green'" style="color: #67C23A">{{ scope.row.title }}</span>
-            <span v-else-if="scope.row.fileColor == 'yellow'" style="color: #E6A23C">{{ scope.row.title }}</span>
-            <span v-else>{{ scope.row.title }}</span>
+            <div v-if="scope.row.fileColor == 'red'" class="red" ><span v-html="showDate(scope.row.title)" ></span></div>
+            <div v-else-if="scope.row.fileColor == 'blue'" class="blue" ><span v-html="showDate(scope.row.title)" ></span></div>
+            <div v-else-if="scope.row.fileColor == 'green'" class="green" ><span v-html="showDate(scope.row.title)" ></span></div>
+            <div v-else-if="scope.row.fileColor == 'yellow'" class="yellow" ><span v-html="showDate(scope.row.title)" ></span></div>
+            <div v-else><span v-html="showDate(scope.row.title)" ></span></div>
           </template>
         </el-table-column>
         <el-table-column
@@ -429,12 +432,6 @@
       }
     },
     methods: {
-      numLimit () {
-        // console.log(this.dialogData.secretDate)
-        if (this.dialogData.secretDate < 0) {
-          this.dialogData.secretDate = 0
-        }
-      },
       searchFirst () {
         this.page = 1
         this._search()
@@ -777,6 +774,14 @@
   }
 </style>
 <style scoped lang="stylus">
+  .red
+    color #F56C6C
+  .blue
+    color #409EFF
+  .green
+    color #67C23A
+  .yellow
+    color #E6A23C
   .search-text
     color red
   .detail_father .detail-item  /deep/ .el-input__inner

@@ -1,5 +1,5 @@
-export const URL = 'http://120.27.47.84:8081'
-// export const URL = 'http://127.0.0.1:8081'
+// export const URL = 'http://120.27.47.84:8081'
+export const URL = 'http://127.0.0.1:8081'
 export const ERR_OK = 'true'
 export const ERR_ERROR = 'false'
 export const MSG = 'msg'

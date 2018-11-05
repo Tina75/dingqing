@@ -49,7 +49,7 @@
             </div>
             <div class="detail-item">
               <span class="input-label">备注：</span>
-              <el-select v-if="note === '借阅' || note === '销毁' || note === '其他'" v-model="note" placeholder="请选择" @change="searchFirst()" class="detail-input">
+              <el-select v-if="note === '借阅' || note === '销毁' || note === '丢失'" v-model="note" placeholder="请选择" @change="searchFirst()" class="detail-input">
                 <el-option v-for="item in noteOptions" :key="item.value"
                            :value="item.value"
                            :label="item.label">
@@ -111,6 +111,7 @@
         <el-table-column
           prop="virtualId"
           label="序号"
+          width="55"
           >
           <template slot-scope="scope">
             <span v-html="showDate(scope.row.virtualId)" ></span>
@@ -126,7 +127,9 @@
         </el-table-column>
         <el-table-column
           prop="rollId"
-          label="卷号">
+          label="卷号"
+          width="55"
+        >
           <template slot-scope="scope">
             <span v-html="showDate(scope.row.rollId)" ></span>
           </template>
@@ -147,7 +150,8 @@
         </el-table-column>
         <el-table-column
           prop="title"
-          label="题名">
+          label="题名"
+          width="400">
           <template slot-scope="scope">
             <div v-if="scope.row.fileColor == 'red'" class="red" ><span v-html="showDate(scope.row.title)" ></span></div>
             <div v-else-if="scope.row.fileColor == 'blue'" class="blue" ><span v-html="showDate(scope.row.title)" ></span></div>
@@ -165,7 +169,8 @@
         </el-table-column>
         <el-table-column
           prop="pageCount"
-          label="页数">
+          label="页数"
+          width="55">
           <template slot-scope="scope">
             <span v-html="showDate(scope.row.pageCount)" ></span>
           </template>
@@ -193,7 +198,7 @@
           >
           <template slot-scope="scope">
             <!--<el-input @keyup.enter.native.prevent="changeNote(scope.row.virtualId, scope.row.id)" v-model="scope.row.note" placeholder="请输入内容"></el-input>-->
-            <el-select v-if="scope.row.note === '借阅' || scope.row.note === '销毁' || scope.row.note === '其他'"
+            <el-select v-if="scope.row.note === '借阅' || scope.row.note === '销毁' || scope.row.note === '丢失'"
                        v-model="scope.row.note"
                        placeholder="请选择"
                        @change="changeNote(scope.row.note, scope.row.virtualId)" >
@@ -278,7 +283,7 @@
             <div class="detail-item">
               <span class="input-label">备注：</span>
               <!--<el-input class="detail-input"  v-model="dialogData.note"></el-input>-->
-              <el-select v-if="dialogData.note === '借阅' || dialogData.note === '销毁' || dialogData.note === '其他'" v-model="dialogData.note" placeholder="请选择"  class="detail-input">
+              <el-select v-if="dialogData.note === '借阅' || dialogData.note === '销毁' || dialogData.note === '丢失'" v-model="dialogData.note" placeholder="请选择"  class="detail-input">
                 <el-option v-for="item in noteOptions" :key="item.value"
                            :value="item.value"
                            :label="item.label">
@@ -365,7 +370,7 @@
             <div class="detail-item">
               <span class="input-label">备注：</span>
               <!--<el-input class="detail-input"  v-model="dialogData.note"></el-input>-->
-              <el-select v-if="dialogData.note === '借阅' || dialogData.note === '销毁' || dialogData.note === '其他'" v-model="dialogData.note" placeholder="请选择"  class="detail-input">
+              <el-select v-if="dialogData.note === '借阅' || dialogData.note === '销毁' || dialogData.note === '丢失'" v-model="dialogData.note" placeholder="请选择"  class="detail-input">
                 <el-option v-for="item in noteOptions" :key="item.value"
                            :value="item.value"
                            :label="item.label">
@@ -735,8 +740,8 @@
             label: '销毁'
           },
           {
-            value: '其他',
-            label: '其他'
+            value: '丢失',
+            label: '丢失'
           },
           {
             value: '',

@@ -77,22 +77,34 @@
             </div>
           </div>
           <div class="detail">
-            <div class="block">
-              <span class="input-label">起始时间：</span>
+            <div class="detail-item">
+              <span class="input-label">开始时间：</span>
               <el-date-picker
                 @change="searchFirst()"
                 class="detail-input"
                 value-format="yyyy-MM-dd"
-                v-model="time"
-                type="daterange"
+                v-model="start"
                 align="right"
-                unlink-panels
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
+                :picker-options="pickerOptions1"
+                placeholder="开始日期"
               >
               </el-date-picker>
             </div>
+            <div class="detail-item">
+              <span class="input-label">结束时间：</span>
+              <el-date-picker
+                @change="searchFirst()"
+                class="detail-input"
+                value-format="yyyy-MM-dd"
+                v-model="end"
+                align="right"
+                :picker-options="pickerOptions2"
+                placeholder="结束日期"
+              >
+              </el-date-picker>
+            </div>
+            <div class="detail-item"></div>
+            <div class="detail-item"></div>
           </div>
         </div>
       </transition>
@@ -444,8 +456,8 @@
           virtualId: this.virtualId,
           id: this.id,
           responsePerson: this.responsePerson,
-          start: this.time[0],
-          end: this.time[1],
+          start: this.start,
+          end: this.end,
           title: this.title,
           level: this.level,
           note: this.note,
@@ -475,10 +487,7 @@
         this._search()
       },
       exportIP (event) {
-        if (!this.time) {
-          this.time = ['', '']
-        }
-        let str = exportString + `?id=${this.id}&fileId=${this.fileId}&responsePerson=${encodeURIComponent(this.responsePerson)}&title=${encodeURIComponent(this.title)}&level=${this.level}&start=${this.time[0]}&end=${this.time[1]}&note=${encodeURIComponent(this.note)}&fileType=${this.fileType}&concatField=${encodeURIComponent(this.concatField)}`
+        let str = exportString + `?id=${this.id}&fileId=${this.fileId}&responsePerson=${encodeURIComponent(this.responsePerson)}&title=${encodeURIComponent(this.title)}&level=${this.level}&start=${this.start}&end=${this.end}&note=${encodeURIComponent(this.note)}&fileType=${this.fileType}&concatField=${encodeURIComponent(this.concatField)}`
         event.target.href = str
       },
       importFile (event) {
@@ -637,6 +646,7 @@
       }
     },
     data () {
+      let _this = this
       return {
         superShow: localStorage.getItem('super') || false,
         insertShow: false,
@@ -666,7 +676,8 @@
         responsePerson: '',
         title: '',
         level: '',
-        time: '',
+        start: '',
+        end: '',
         note: '',
         fileTypeFlag: this.$route.params.fileType,
         fileTypeMap: {
@@ -748,7 +759,17 @@
         options: [
           {name: '无', value: '0'},
           {name: '永久', value: '-1'}
-        ]
+        ],
+        pickerOptions1: {
+          disabledDate (time) {
+            return _this.end ? time.getTime() > new Date(_this.end).getTime() : false
+          }
+        },
+        pickerOptions2: {
+          disabledDate (time) {
+            return _this.start ? time.getTime() < new Date(_this.start).getTime() : false
+          }
+        }
       }
     },
     computed: {

@@ -37,3 +37,8 @@ export function modifyUser (data) {
   const url = URL + '/Session/modifyUser'
   return axios.post(url, qs.stringify(data, { indices: false }))
 }
+
+export function getExposedPage () { // 权限
+  const url = URL + '/Session/getExposedPage'
+  return axios.get(url)
+}

@@ -63,6 +63,7 @@
               if (res.data.status === config.ERR_OK) {
                 this.msg = ''
                 this.$router.push({ path: '/index' })
+                localStorage.setItem('username', this.loginForm.username)
                 if (res.data.super) {
                   localStorage.setItem('super', true)
                 } else {

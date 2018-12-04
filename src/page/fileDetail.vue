@@ -417,7 +417,7 @@
 </template>
 
 <script>
-  import {search, exportString, importExcel, insertClick, updateClick, softDelete} from 'api/fileDetail'
+  import {search, exportString, importExcel, insertClick, updateClick, softDelete, checkPermission} from 'api/fileDetail'
   import * as config from 'api/config'
   import SelectInput from '@/components/SelectInput/SelectInput'
   export default {
@@ -486,9 +486,29 @@
         this.page = val
         this._search()
       },
-      exportIP (event) {
-        let str = exportString + `?id=${this.id}&fileId=${this.fileId}&responsePerson=${encodeURIComponent(this.responsePerson)}&title=${encodeURIComponent(this.title)}&level=${this.level}&start=${this.start}&end=${this.end}&note=${encodeURIComponent(this.note)}&fileType=${this.fileType}&concatField=${encodeURIComponent(this.concatField)}`
-        event.target.href = str
+      async isExportIP () {
+        let data = {
+          fileType: this.fileType,
+          username: localStorage.getItem('username'),
+          operating: 'export'
+        }
+        let flag = 'false'
+        await checkPermission(data).then(res => {
+          if (res.data.status === 'true') {
+            flag = res.data.data
+          } else {
+            this.$message.error(res.data.msg)
+          }
+        })
+        return flag
+      },
+      async exportIP (event) {
+        if (await this.isExportIP() === 'true') {
+          let str = exportString + `?id=${this.id}&fileId=${this.fileId}&responsePerson=${encodeURIComponent(this.responsePerson)}&title=${encodeURIComponent(this.title)}&level=${this.level}&start=${this.start}&end=${this.end}&note=${encodeURIComponent(this.note)}&fileType=${this.fileType}&concatField=${encodeURIComponent(this.concatField)}`
+          event.target.href = str
+        } else {
+          this.$message.error('没有导出权限')
+        }
       },
       importFile (event) {
         let fd = new FormData()
@@ -536,19 +556,6 @@
         this.multipleSelection = val
       },
       _insertClick () {
-        // let data = {
-        //   id: this.dialogData.id,
-        //   fileId: this.dialogData.fileId,
-        //   rollId: this.dialogData.rollId,
-        //   responsePerson: this.dialogData.responsePerson,
-        //   title: this.dialogData.title,
-        //   level: this.dialogData.level,
-        //   date: this.dialogData.date,
-        //   secretDate: this.dialogData.secretDate,
-        //   note: this.dialogData.note,
-        //   fileType: this.dialogData.fileType,
-        //   pageCount: this.dialogData.pageCount
-        // }
         if (this.dialogData.secretDate < -1 || this.dialogData.secretDate > 999) {
           this.$alert('保密年限只能大于等于-1且小于1000', '提示')
           return
@@ -566,20 +573,6 @@
         })
       },
       _updateClick () {
-        // let data = {
-        //   virtualId: this.dialogData.virtualId,
-        //   id: this.dialogData.id,
-        //   fileId: this.dialogData.fileId,
-        //   rollId: this.dialogData.rollId,
-        //   responsePerson: this.dialogData.responsePerson,
-        //   title: this.dialogData.title,
-        //   level: this.dialogData.level,
-        //   date: this.dialogData.date,
-        //   secretDate: this.dialogData.secretDate,
-        //   note: this.dialogData.note,
-        //   fileType: this.dialogData.fileType,
-        //   pageCount: this.dialogData.pageCount
-        // }
         if (this.dialogData.secretDate < -1 || this.dialogData.secretDate > 999) {
           this.$alert('保密年限只能大于等于-1且小于1000', '提示')
           return

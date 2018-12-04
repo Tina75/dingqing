@@ -29,3 +29,8 @@ export function updateClick (data) {
   const url = URL + '/Archives/update'
   return axios.post(url, qs.stringify(data))
 }
+
+export function checkPermission (data) {
+  const url = URL + '/Session/checkPermission'
+  return axios.post(url, qs.stringify(data))
+}

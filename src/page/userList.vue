@@ -26,7 +26,7 @@
                 <div class="body" v-if="item[1]">
                   <div class="item">自拟文件</div>
                   <div class="item">
-                    <el-checkbox-group v-model="props.row.permissions[index][1]"  @change="_modifyUser(props.row)">
+                    <el-checkbox-group v-model="props.row.permissions[index][1]">
                       <el-checkbox label="import">导入</el-checkbox>
                       <el-checkbox label="export">导出</el-checkbox>
                       <el-checkbox label="insert" >新增</el-checkbox>
@@ -37,9 +37,9 @@
                   </div>
                 </div>
                 <div class="body" v-if="item[2]">
-                  <div class="item">内部文件</div>
+                  <div class="item">内部传真</div>
                   <div class="item">
-                    <el-checkbox-group v-model="props.row.permissions[index][2]"  @change="_modifyUser(props.row)">
+                    <el-checkbox-group v-model="props.row.permissions[index][2]" >
                       <el-checkbox label="import">导入</el-checkbox>
                       <el-checkbox label="export">导出</el-checkbox>
                       <el-checkbox label="insert" >新增</el-checkbox>
@@ -52,7 +52,7 @@
                 <div class="body" v-if="item[3]">
                   <div class="item">机要文件</div>
                   <div class="item">
-                    <el-checkbox-group v-model="props.row.permissions[index][3]"  @change="_modifyUser(props.row)">
+                    <el-checkbox-group v-model="props.row.permissions[index][3]">
                       <el-checkbox label="import">导入</el-checkbox>
                       <el-checkbox label="export">导出</el-checkbox>
                       <el-checkbox label="insert" >新增</el-checkbox>
@@ -63,9 +63,9 @@
                   </div>
                 </div>
                 <div class="body" v-if="item[4]">
-                  <div class="item">密码文件</div>
+                  <div class="item">密码电报</div>
                   <div class="item">
-                    <el-checkbox-group v-model="props.row.permissions[index][4]"  @change="_modifyUser(props.row)">
+                    <el-checkbox-group v-model="props.row.permissions[index][4]" >
                       <el-checkbox label="import">导入</el-checkbox>
                       <el-checkbox label="export">导出</el-checkbox>
                       <el-checkbox label="insert" >新增</el-checkbox>
@@ -78,7 +78,7 @@
                 <div class="body" v-if="item[5]">
                   <div class="item">县级文件</div>
                   <div class="item">
-                    <el-checkbox-group v-model="props.row.permissions[index][5]"  @change="_modifyUser(props.row)">
+                    <el-checkbox-group v-model="props.row.permissions[index][5]" >
                       <el-checkbox label="import">导入</el-checkbox>
                       <el-checkbox label="export">导出</el-checkbox>
                       <el-checkbox label="insert" >新增</el-checkbox>
@@ -88,6 +88,9 @@
                     </el-checkbox-group>
                   </div>
                 </div>
+              </div>
+              <div class="btn" v-if="props.row.permissions.length>0">
+                <el-button type="primary" size="small" @click="modifyUserBtn(props.row)">确认修改</el-button>
               </div>
             </div>
           </template>
@@ -106,18 +109,6 @@
           prop="user.password"
           label="密码">
         </el-table-column>
-        <!--<el-table-column-->
-          <!--label="权限">-->
-          <!--<template slot-scope="scope">-->
-            <!--&lt;!&ndash;<span v-for="item in scope.row.permissions">{{item}}</span>&ndash;&gt;-->
-            <!--<div>scope.row.permissions</div>-->
-            <!--<el-checkbox-group v-model="scope.row.permissions" @change="_modifyUser(scope.row)">-->
-              <!--<el-checkbox label="insert" >新增</el-checkbox>-->
-              <!--<el-checkbox label="delete"> 删除</el-checkbox>-->
-              <!--<el-checkbox label="update">更新</el-checkbox>-->
-            <!--</el-checkbox-group>-->
-          <!--</template>-->
-        <!--</el-table-column>-->
         <el-table-column
           label="操作"
           fixed="right"
@@ -142,7 +133,7 @@
         </div>
         <div slot="footer" class="dialog-footer">
           <el-button @click="modifyShow = false">取 消</el-button>
-          <el-button type="primary" @click="_modifyUser(false)">确 定</el-button>
+          <el-button type="primary" @click="_modifyUser()">确 定</el-button>
         </div>
       </el-dialog>
     </div>
@@ -185,23 +176,16 @@
           }
         })
       },
-      _modifyUser (row) {
-        row.permissions = row.permissions.map(item => {
-          return JSON.stringify(item)
-        })
-        if (row) {
-          this.modifyDate = {
-            username: row.user.username,
-            password: row.user.password,
-            id: row.user.id,
-            permissions: row.permissions
-          }
-        }
-        console.log(this.modifyDate.permissions)
+      modifyUserBtn (row) {
+        this.modifyData(row)
+        this._modifyUser()
+      },
+      _modifyUser () {
         modifyUser(this.modifyDate).then(res => {
           if (res.data.status === config.ERR_OK) {
             this.$message({
-              message: '修改成功'
+              message: '修改成功',
+              type: 'success'
             })
           } else {
             this.$alert(res.data.msg, '提示')
@@ -210,18 +194,21 @@
           this._search() // 刷新数据
         })
       },
-      modifyClick (row) {
-        console.log(row)
-        this.modifyShow = true
-        row.permissions = row.permissions.map(item => {
+      modifyData (row) { // 修改时数据处理
+        let data = []
+        data = row.permissions.map(item => {
           return JSON.stringify(item)
         })
         this.modifyDate = {
           username: row.user.username,
           password: row.user.password,
           id: row.user.id,
-          permissions: row.permissions
+          permissions: data
         }
+      },
+      modifyClick (row) {
+        this.modifyShow = true
+        this.modifyData(row)
       }
     }
   }
@@ -235,6 +222,10 @@
 </style>
 <style scoped lang="stylus">
   .table-inner
+    .btn
+      text-align right
+      margin-right: 8%
+      margin-top: 20px
     .head,.body
       display flex
       /*border-bottom 1px solid #ddd*/
